@@ -1,87 +1,47 @@
-#!/bin/bash
+# set var
+rv32emu=$HOME/repo/rv32emu/build/rv32emu
+rv32compile=rsicv-none-elf-gcc
+arch=rv32i_zicsr
+abi=ilp32
+gs=getcycle
 
-function runprogram() {
-  if [ $1 -ne 0 ]
-  then
-    echo "make error, skip execution"
-    return
-  fi
-  echo "output into out${2} ..."
-  echo "program size:" > "out${2}"
-  riscv-none-elf-size hammingdistance.elf >> "out${2}"
-  echo "execution result:" >> "out${2}"
-  rv32emu hammingdistance.elf >> "out${2}"
-  echo "dump into dump${2} ..."
-  riscv-none-elf-objdump -d hammingdistance.elf > "dump${2}"
-}
+opt=b16_SIMD_opt
+norm=b16_SIMD
+mat=mat_int32
+level=( "-O0" "-O1" "-O2" "-O3" "-Ofast" )
+lev=( "O0" "O1" "O2" "O3" "Ofast" )
 
-function showhelp() {
-  echo "uses gcc compiler and main.c"
-  echo "options:"
-  echo "  help: show help"
-  echo "  clean clear all out and dump file"
-  echo "  all: run all"
-  echo "  Ox: run with Ox optimization in c form (x=optimizion level)"
-  echo "  asm: run with O0 optimization in asm form"
-  echo "  asm Ox: run with Ox optimization in asm form  (x=optimizion level)"
-}
+# build env var
+cd $HOME/rv32compile
+source setenv
+cd $HOME
 
-optims=( "-O0" "-O1" "-O2" "-O3" "-Os" "-Ofast" )
-if [ $# -eq 0 ] || [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]
-then
-  showhelp
-elif [ $1 = "clean" ]
-then
-  for i in "${optims[@]}"
-  do
-    if [ -f "out${i}" ] || [ -f "dump${i}" ]
-    then
-      echo "removing out${i} and dump${i} ..."
-      rm "out${i}" "dump${i}"
-    fi
-    if [ -f "out-asm${i}" ] || [ -f "dump-asm${i}" ]
-    then
-      echo "removing out-asm${i} and dump-asm${i} ..."
-      rm "out-asm${i}" "dump-asm${i}"
-    fi
-  done
-elif [ $1 = "all" ]
-then
-  for i in "${optims[@]}"
-  do
-    make OLVL=$i
-    runprogram $? $i
-    make clean
-  done
-  sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
-  for i in "${optims[@]}"
-  do
-    make OLVL=$i
-    runprogram $? "-asm${i}"
-    make clean
-  done
-  sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
-elif [ $1 = "asm" ]
-then
-  sed -i "s/HammingDistance_c/HammingDistance_s/g" main.c
-  if [ $# -eq 1 ]
-  then
-    make OLVL=-O0
-    runprogram $? "-asm-O0"
-    make clean
-  else
-    make OLVL="-${2}"
-    runprogram $? "-asm-${2}"
-    make clean
-  fi
-  sed -i "s/HammingDistance_s/HammingDistance_c/g" main.c
-elif [[ $1 = O* ]]
-then
-  make OLVL="-${1}"
-  runprogram $? "-${1}"
-  make clean
-else
-  echo "unknown option"
-  exit
-fi
-echo "finished"
+# compile getcycle.s
+cd $HOME/repo/rv32emu/tests/ag
+${rv32compile} -march=${arch} -mabi=${abi} -c -o ${gs}.o ${gs}.s
+
+# compile function
+for (( i=0; i<=4; i=i+1 )); do
+    ${rv32compile} -march=${arch} -mabi=${abi} ${level[${i}]} -c -o ${mat}_${lev[${i}]}.o ${mat}.s
+    ${rv32compile} -march=${arch} -mabi=${abi} ${level[${i}]} -c -o ${norm}_${lev[${i}]}.o ${norm}.s
+    ${rv32compile} -march=${arch} -mabi=${abi} ${level[${i}]} -c -o ${opt}_${lev[${i}]}.o ${opt}.s
+    echo function compile done..
+done
+
+# compile main
+for (( i=0; i<=4; i=i+1 )); do
+    ${rv32compile} -march=${arch} -mabi=${abi} ${level[${i}]} -c -o main_${mat}_${lev[${i}]}.o main_${mat}.s
+    ${rv32compile} -march=${arch} -mabi=${abi} ${level[${i}]} -c -o main_${norm}_${lev[${i}]}.o main_${norm}.s
+    ${rv32compile} -march=${arch} -mabi=${abi} ${level[${i}]} -c -o main_${opt}_${lev[${i}]}.o main_${opt}.s
+    echo main compile done..
+done
+
+# build elf
+for (( i=0; i<=4; i=i+1 )); do
+    ${rv32compile} -o ${mat}_${lev[${i}]}.elf main_${mat}_${lev[${i}]}.o ${mat}_${lev[${i}]}.o ${gs}.o
+    ${rv32compile} -o ${norm}_${lev[${i}]}.elf main_${norm}_${lev[${i}]}.o ${norm}_${lev[${i}]}.o ${gs}.o
+    ${rv32compile} -o ${opt}_${ev[${i}]}.elf main_${opt}_${lev[${i}]}.o ${opt}_${lev[${i}]}.o ${gs}.o
+    echo elf build done..
+done
+
+echo all compile done..

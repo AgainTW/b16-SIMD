@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include "mat_int32.h"
 
+extern uint64_t get_cycles();
+
 //struct _matf16_t;  
 typedef struct _matf16_t matf16_t;
 
