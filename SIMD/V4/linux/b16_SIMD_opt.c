@@ -1,12 +1,9 @@
-#include<stdio.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdint.h>
+#include "b16_SIMD_opt.h"
 
-typedef struct 
-{
-    int32_t row;
-    int32_t col;
-    unsigned int *data;
-} matf16_t;
+//struct _matf16_t;  
+typedef struct _matf16_t matf16_t;
 
 uint32_t highestbit(uint32_t x) {
     x |= (x >> 1);
@@ -287,7 +284,6 @@ matf16_t *matmul(matf16_t *first, matf16_t *second, matf16_t *retmat, unsigned i
     int32_t bidx;
     int32_t cidx = 0;
     int32_t i=0,j=0,k=0;
-    printf("%d\n",n);
     for(i = 0; i < m; i ++) {
         for(j = 0; j < o; j ++) {
             subtotal = 0;

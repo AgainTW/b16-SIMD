@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "mat_int32.h"
+
+//struct _matf16_t;  
+typedef struct _matf16_t matf16_t;
 
 unsigned int aarr[9] = {0x3f630000, 0x3e380000, 0x3d230000,
               0x3d8f0000, 0x3f800000, 0x3e4c0000,

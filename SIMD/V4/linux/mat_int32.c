@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "mat_int32.h"
 
-typedef struct 
-{
-    int32_t row;
-    int32_t col;
-    unsigned int *data;
-} matf16_t;
+//struct _matf16_t;  
+typedef struct _matf16_t matf16_t;
 
 uint32_t highestbit(uint32_t x) 
 {

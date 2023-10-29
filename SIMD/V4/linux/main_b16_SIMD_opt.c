@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "b16_SIMD_opt.h"
+
+//struct _matf16_t;  
+typedef struct _matf16_t matf16_t;
 
 unsigned int aarr[9] = {0x3f630000, 0x3e380000, 0x3d230000,
               0x3d8f0000, 0x3f800000, 0x3e4c0000,
@@ -28,16 +32,14 @@ int main() {
         MD_r_h[7] = 0x3e8a0000
         MD_r_h[8] = 0x3da50000
     */
-    uint32_t start = get_cycles();
-
+    //uint32_t start = get_cycles();
     matf16_t retmat = {0, 0, 0};
     unsigned int retdata[9] = {0};
     unsigned int *ptr_ret = &retdata[0];
     matf16_t *cmat = matmul(&amat, &bmat, &retmat, ptr_ret);
-    
-    uint32_t end = get_cycles();
+    //uint32_t end = get_cycles();
 
-    printf("Elapse cycle: %d\n", end-start);
+    //printf("Elapse cycle: %d\n", end-start);
     unsigned int *c = cmat->data;
     printf("result:\n");
     int32_t i = 0;
