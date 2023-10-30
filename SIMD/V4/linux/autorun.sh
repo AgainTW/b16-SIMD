@@ -42,7 +42,7 @@ done
 for (( i=0; i<=4; i=i+1 )); do
     ${rv32compile} -o ${mat}_${lev[${i}]}.elf main_${mat}_${lev[${i}]}.o ${mat}_${lev[${i}]}.o ${gs}.o
     ${rv32compile} -o ${norm}_${lev[${i}]}.elf main_${norm}_${lev[${i}]}.o ${norm}_${lev[${i}]}.o ${gs}.o
-    ${rv32compile} -o ${opt}_${ev[${i}]}.elf main_${opt}_${lev[${i}]}.o ${opt}_${lev[${i}]}.o ${gs}.o
+    ${rv32compile} -o ${opt}_${lev[${i}]}.elf main_${opt}_${lev[${i}]}.o ${opt}_${lev[${i}]}.o ${gs}.o
     echo elf build done..
 done
 
